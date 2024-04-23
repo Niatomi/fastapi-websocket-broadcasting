@@ -10,10 +10,10 @@ stop:
 	docker compose stop
 
 exec:
-	docker exec -u 0 -it broadcastAPI bash 
+	docker exec -u 0 -it broadcast_api bash 
 
 logs:
-	docker logs -f broadcastAPI
+	docker logs -f broadcast_api
 
 sn:
 	sudo systemctl stop nginx
