@@ -1,0 +1,64 @@
+version: "3.1"
+services:
+
+  broadcast_api:
+    container_name: broadcast_api
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/src
+      - ./logs/:/var/log/broadcastAPI/
+    ports:
+      - "9999:9999"
+
+  nginx:
+    image: nginx
+    container_name: nginx-broadcast
+    volumes:
+    # Nginx configs
+    - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    - ./docker/nginx/conf.d/dev/:/etc/nginx/conf.d/
+    - ./logs/:/var/log/nginx/
+    ports:
+    - "80:80"
+    - "8080:8080"
+    - "443:443"
+    depends_on:
+      - broadcast_api
+
+  dozzle:
+    container_name: broadcast-dozzle
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 8888:8080
+
+  logrotate:
+    container_name: broadcast-logrotate
+    image: blacklabelops/logrotate
+    environment:
+      - LOGS_DIRECTORIES=/var/log/common-logs
+      - LOGROTATE_SIZE=100k
+
+      - LOGROTATE_INTERVAL=hourly"
+      - LOGROTATE_LOGFILE=/var/log/common-logs/logrotatecron.log
+      - LOGROTATE_STATUSFILE=/var/log/common-logs/logrotate.status
+      - LOGROTATE_CRONSCHEDULE=* * * * * *
+    volumes:
+      - ./logs/:/var/log/common-logs
+
+  logseq:
+    image: "ghcr.io/logseq/logseq-webapp:latest"
+    ports:
+      - 3001:80
+
+volumes:
+  postgres:
+  pgadmin:
+  data: {}
+
+networks:
+  postgres:
+    driver: bridge
