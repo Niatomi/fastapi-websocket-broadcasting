@@ -2,17 +2,17 @@ from fastapi import (
     APIRouter,
     WebSocket
 )
-from .broadcaster import scheduler
+from .broadcaster import resources_scheduler
 import asyncio
 
 
-router = APIRouter(prefix='/random/metrics')
+router = APIRouter(prefix='/server/resources')
 
 
 @router.websocket('/connect/')
 async def websocket_endpoint(websocket: WebSocket):
-    await scheduler.ws.connect(websocket)
+    await resources_scheduler.ws.connect(websocket)
     while True:
-        if websocket not in scheduler.ws:
+        if websocket not in resources_scheduler.ws:
             break
         await asyncio.sleep(5)
